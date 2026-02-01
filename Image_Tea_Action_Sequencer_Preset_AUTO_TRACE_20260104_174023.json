@@ -1,0 +1,47 @@
+{
+  "identifier": "IMAGE_TEA_ACTION_SEQUENCER",
+  "file_type": "preset",
+  "export_date": "2026-01-04T17:40:28.181825",
+  "version": "1.0",
+  "presets": [
+    {
+      "preset_name": "AUTO TRACE",
+      "preset_description": "",
+      "preset_type": "Batch",
+      "platform_name": "Illustrator",
+      "platform_note": "",
+      "action_sets": [
+        {
+          "name": "AUTOTRACE",
+          "description": ""
+        }
+      ],
+      "actions": [
+        {
+          "action_set_name": "AUTOTRACE",
+          "name": "Trace Image",
+          "type": "Script",
+          "icon": "code",
+          "color": "#f44336",
+          "delay": 0,
+          "javascript_code": "/*\n  image-tracer-procedure.jsx\n  version: 1.0\n  created: 2025-12-30\n  revision: 1\n  created by: Mudrikul Hikam\n  developer: Desainia Studio\n  License: MIT License\n  Contact: https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3\n  TikTok: https://www.tiktok.com/@desainia\n\n\n  Description:\n  This script automates the process of tracing a raster image in Adobe Illustrator using a specified preset,\n  expanding the tracing, and performing a series of operations on the resulting paths.\n\n\n  Scope: Intended to be run in Image Tea Action Sequencer created by Desainia Studio.\n  Note: This script assumes that the tracingPresetsList variable is available in the global scope,\n  as it is in Illustrator's scripting environment. You can modify the PRESET_NAME variable to use a different preset.\n\n\n  Procedure:\n  Step 1: Select the first RasterItem/PlacedItem.\n  Step 2: Use PRESET_NAME (predefined; no UI).\n  Step 3: Run item.trace() and apply preset by index.\n  Step 4: Expand and ungroup tracing.\n  Step 5: Select the bottom-most TOP-LEVEL path in the bottom layer. (Alert and abort if only nested paths exist.)\n  Step 6: Set selected path fill to configured RGB color and remove stroke.\n  Step 7: Remove the selected path.\n  Step 8: Select all.\n  Step 9: Group.\n\n\n  License:\n  MIT License\n  Copyright (c) 2025 Desainia Studio\n\n\n  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\n\n  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\n\n  THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n*/\n\n\n(function () {\n  if (!app || !app.documents || !app.documents.length) {\n    alert('No document open');\n    return;\n  }\n\n\n  var doc = app.activeDocument;\n  var items = doc.pageItems;\n  var found = null;\n\n\n  // ===================== CONFIGURATION ====================\n\n\n  // Set the preset to use (must match preset name visible in Illustrator's Image Trace panel)\n  // Currently set to 'Low Fidelity Photo' preset by default\n  var PRESET_NAME = 'Low Fidelity Photo';\n\n\n  // Configurable fill color for Step 6 (RGB)\n  // Currently set to green for easy visibility\n  var FILL_COLOR = { r: 0, g: 255, b: 0 };\n\n\n  // Pause after coloring the background (ms)\n  // Currently set to 300 ms to allow brief viewing\n  var PAUSE_AFTER_COLOR_MS = 300;\n  \n  // Remove the selected path (background) after showing color? Set true/false\n  // Currently set to true to remove the selected path (background) after coloring\n  var REMOVE_BG = true;\n  // =================== END CONFIGURATION ==================\n\n\n  // Step 1\n  for (var i = 0; i < items.length; i++) {\n    var ty = items[i].typename;\n    if (ty === 'RasterItem' || ty === 'PlacedItem') {\n      found = items[i];\n      break;\n    }\n  }\n\n\n  if (!found) {\n    alert('No image found');\n    return;\n  }\n\n\n  // Step 1\n  for (var j = 0; j < items.length; j++) {\n    try { items[j].selected = false; } catch (e) {}\n  }\n  try { found.selected = true; } catch (e) {}\n\n\n  if (typeof found.trace !== 'function') {\n    alert('item.trace() not available');\n    return;\n  }\n\n\n  // Step 2\n  if (typeof tracingPresetsList === 'undefined' || !tracingPresetsList.length) {\n    alert('No tracingPresetsList');\n    return;\n  }\n  var preset = null;\n  for (var kk = 0; kk < tracingPresetsList.length; kk++) {\n    var cand = tracingPresetsList[kk];\n    var label = (cand && cand.name) ? cand.name : (cand && cand.title) ? cand.title : String(cand);\n    if (label === PRESET_NAME) { preset = cand; break; }\n  }\n  if (!preset) { alert('Preset \"' + PRESET_NAME + '\" not found'); return; }\n\n\n  // Step 3\n  var t;\n  try {\n    t = found.trace();\n  } catch (err) {\n    alert('Trace failed: ' + (err && err.message ? err.message : err));\n    return;\n  }\n\n\n  var tImg = t || (found.tracing ? found : null);\n\n\n  if (!tImg || !tImg.tracing || !tImg.tracing.tracingOptions) {\n    alert('Tracing object not found');\n    return;\n  }\n\n\n  try {\n    tImg.tracing.tracingOptions.loadFromPreset(preset);\n  } catch (err) {\n    alert('Failed to load preset');\n    return;\n  }\n\n\n  // Step 4\n  try {\n    var expanded = tImg.tracing.expandTracing();\n    try { if (expanded) expanded.selected = true; } catch (e) {}\n    try { redraw(); } catch (r) {}\n    try { $.sleep(100); } catch (s) {}\n  } catch (err) {\n    alert('Expand failed');\n    return;\n  }\n\n\n  try { app.executeMenuCommand('ungroup'); } catch (e) {}\n\n\n  // Step 5\n  var bottom = (doc.layers && doc.layers.length) ? doc.layers[doc.layers.length - 1] : null;\n  if (!bottom) {\n    alert('No bottom layer');\n    return;\n  }\n\n\n  try { bottom.visible = true; } catch (e) {}\n\n\n  var target = null;\n  if (bottom.pathItems && bottom.pathItems.length > 0) target = bottom.pathItems[bottom.pathItems.length - 1];\n  else if (bottom.compoundPathItems && bottom.compoundPathItems.length > 0) target = bottom.compoundPathItems[bottom.compoundPathItems.length - 1];\n\n\n  if (!target) {\n    alert('No top-level path found in bottom layer (nested-only). Aborting.');\n    return;\n  }\n\n\n  for (var s = 0; s < items.length; s++) try { items[s].selected = false; } catch (e) {}\n  try { target.selected = true; } catch (e) { alert('Cannot select target'); return; }\n\n\n  // Step 6\n  try {\n    var gcol = new RGBColor();\n    gcol.red = FILL_COLOR.r;\n    gcol.green = FILL_COLOR.g;\n    gcol.blue = FILL_COLOR.b;\n    target.filled = true;\n    target.fillColor = gcol;\n    target.stroked = false;\n  } catch (err) {\n    alert('Step 6 failed');\n    return;\n  }\n\n\n  try { redraw(); } catch (r) {}\n  try { $.sleep(PAUSE_AFTER_COLOR_MS); } catch (s) {}\n\n\n  // Step 7\n  if (REMOVE_BG) {\n    try { target.remove(); } catch (err) { alert('Step 7 failed'); return; }\n  }\n\n\n  // Step 8\n  try { app.executeMenuCommand('selectall'); } catch (err) { alert('Step 8 failed'); return; }\n\n\n  // Step 9\n  try { app.executeMenuCommand('group'); } catch (err) { alert('Step 9 failed'); return; }\n\n\n})();",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 1
+        },
+        {
+          "action_set_name": "AUTOTRACE",
+          "name": "Export EPS",
+          "type": "Export",
+          "icon": "file-export",
+          "color": "#f44336",
+          "delay": 0,
+          "javascript_code": "",
+          "export_format": "EPS",
+          "export_setting": 100,
+          "order_in_preset": 2
+        }
+      ]
+    }
+  ]
+}
