@@ -5,7 +5,7 @@
   "version": "1.0",
   "presets": [
     {
-      "preset_name": "AUTO TRACE",
+      "preset_name": "BATCH AUTO TRACE ADOBE ILLUSTRATOR",
       "preset_description": "",
       "preset_type": "Batch",
       "platform_name": "Illustrator",
