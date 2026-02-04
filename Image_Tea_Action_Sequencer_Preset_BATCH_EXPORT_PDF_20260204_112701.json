@@ -1,0 +1,35 @@
+{
+  "identifier": "IMAGE_TEA_ACTION_SEQUENCER",
+  "file_type": "preset",
+  "export_date": "2026-02-04T11:27:08.208449",
+  "version": "1.0",
+  "presets": [
+    {
+      "preset_name": "BATCH EXPORT PDF",
+      "preset_description": "This preset help you export into pdf file using Adobe Illustrator in batch.",
+      "preset_type": "Batch",
+      "platform_name": "Illustrator",
+      "platform_note": "",
+      "action_sets": [
+        {
+          "name": "BATCH EXPORTER",
+          "description": ""
+        }
+      ],
+      "actions": [
+        {
+          "action_set_name": "BATCH EXPORTER",
+          "name": "Save To PDF",
+          "type": "Export",
+          "icon": "file-export",
+          "color": "#f44336",
+          "delay": 0,
+          "javascript_code": "",
+          "export_format": "PDF",
+          "export_setting": 100,
+          "order_in_preset": 1
+        }
+      ]
+    }
+  ]
+}
