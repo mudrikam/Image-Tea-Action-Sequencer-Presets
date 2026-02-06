@@ -1,0 +1,35 @@
+{
+  "identifier": "IMAGE_TEA_ACTION_SEQUENCER",
+  "file_type": "preset",
+  "export_date": "2026-02-06T17:02:37.041399",
+  "version": "1.0",
+  "presets": [
+    {
+      "preset_name": "CHANGE SELECTED SOLID LAYER",
+      "preset_description": "",
+      "preset_type": "Single Run",
+      "platform_name": "Photoshop",
+      "platform_note": "",
+      "action_sets": [
+        {
+          "name": "TOOLS",
+          "description": ""
+        }
+      ],
+      "actions": [
+        {
+          "action_set_name": "TOOLS",
+          "name": "CHANGE SELECTED SOLID LAYER",
+          "type": "Script",
+          "icon": "code",
+          "color": "#E74C3C",
+          "delay": 0,
+          "javascript_code": "// ===== CONFIG: Ganti HEX di sini =====\nvar hexColor = \"#FF8800\";\n// ======================================\n\n\n// Konversi HEX → RGB\nfunction hexToRgb(hex) {\n    hex = hex.replace(/^#/, \"\");\n    if (hex.length === 3) {\n        hex = hex.split(\"\").map(function(c) { return c + c; }).join(\"\");\n    }\n    return {\n        r: parseInt(hex.substr(0, 2), 16),\n        g: parseInt(hex.substr(2, 2), 16),\n        b: parseInt(hex.substr(4, 2), 16)\n    };\n}\n\n\n// Ubah warna Solid Fill layer\nfunction changeSolidFillColor(hexColor) {\n    var rgb = hexToRgb(hexColor);\n    \n    var desc1 = new ActionDescriptor();\n    var ref1 = new ActionReference();\n    ref1.putEnumerated(stringIDToTypeID(\"contentLayer\"), charIDToTypeID(\"Ordn\"), charIDToTypeID(\"Trgt\"));\n    desc1.putReference(charIDToTypeID(\"null\"), ref1);\n    \n    var desc2 = new ActionDescriptor();\n    var desc3 = new ActionDescriptor();\n    desc3.putDouble(charIDToTypeID(\"Rd  \"), rgb.r);\n    desc3.putDouble(charIDToTypeID(\"Grn \"), rgb.g);\n    desc3.putDouble(charIDToTypeID(\"Bl  \"), rgb.b);\n    desc2.putObject(charIDToTypeID(\"Clr \"), charIDToTypeID(\"RGBC\"), desc3);\n    desc1.putObject(charIDToTypeID(\"T   \"), stringIDToTypeID(\"solidColorLayer\"), desc2);\n    \n    executeAction(charIDToTypeID(\"setd\"), desc1, DialogModes.NO);\n}\n\n\n// Jalankan\nchangeSolidFillColor(hexColor);",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 1
+        }
+      ]
+    }
+  ]
+}
