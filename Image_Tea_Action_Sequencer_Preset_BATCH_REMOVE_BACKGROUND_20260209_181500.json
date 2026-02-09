@@ -1,13 +1,13 @@
 {
   "identifier": "IMAGE_TEA_ACTION_SEQUENCER",
   "file_type": "preset",
-  "export_date": "2026-02-09T18:15:16.243706",
+  "export_date": "2026-02-09T18:28:41.292054",
   "version": "1.0",
   "presets": [
     {
       "preset_name": "BATCH REMOVE BACKGROUND",
       "preset_description": "",
-      "preset_type": "Single Run",
+      "preset_type": "Batch",
       "platform_name": "Photoshop",
       "platform_note": "",
       "action_sets": [
