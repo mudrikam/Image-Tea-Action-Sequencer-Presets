@@ -1,0 +1,95 @@
+{
+  "identifier": "IMAGE_TEA_ACTION_SEQUENCER",
+  "file_type": "preset",
+  "export_date": "2026-02-09T18:15:16.243706",
+  "version": "1.0",
+  "presets": [
+    {
+      "preset_name": "BATCH REMOVE BACKGROUND",
+      "preset_description": "",
+      "preset_type": "Single Run",
+      "platform_name": "Photoshop",
+      "platform_note": "",
+      "action_sets": [
+        {
+          "name": "BATCH TOOLS",
+          "description": ""
+        }
+      ],
+      "actions": [
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "removeBackgroundScript",
+          "type": "Script",
+          "icon": "code",
+          "color": "#ff3131",
+          "delay": 0,
+          "javascript_code": "// SimpleRemoveBG: thanks to Dimas for providing the base script\n\nvar doc = app.activeDocument;\n\n\n// Select background layer if exists\nif (doc.layers.length >= 1 && doc.layers[doc.layers.length - 1].isBackgroundLayer) {\n    doc.activeLayer = doc.layers[doc.layers.length - 1];\n}\n\n\n// Unlock background layer\nif (doc.activeLayer.isBackgroundLayer) {\n    doc.activeLayer.isBackgroundLayer = false;\n}\n\n\n// Run remove background from quick actions\nvar idremoveBackground = stringIDToTypeID( \"removeBackground\" );\nvar desc2 = new ActionDescriptor();\nexecuteAction( idremoveBackground, desc2, DialogModes.NO );",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 1
+        },
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "centerSelectedLayer",
+          "type": "Script",
+          "icon": "code",
+          "color": "#ff3131",
+          "delay": 0,
+          "javascript_code": "var doc = app.activeDocument;\nvar layer = doc.activeLayer;\nvar bounds = layer.bounds;\nvar width = bounds[2].as(\"px\") - bounds[0].as(\"px\");\nvar height = bounds[3].as(\"px\") - bounds[1].as(\"px\");\nvar centerX = doc.width.as(\"px\") / 2;\nvar centerY = doc.height.as(\"px\") / 2;\nvar newLeft = centerX - width / 2;\nvar newTop = centerY - height / 2;\nvar deltaX = UnitValue(newLeft - bounds[0].as(\"px\"), \"px\");\nvar deltaY = UnitValue(newTop - bounds[1].as(\"px\"), \"px\");\nlayer.translate(deltaX, deltaY);",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 2
+        },
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "selectAndCropLayer",
+          "type": "Script",
+          "icon": "code",
+          "color": "#ff3131",
+          "delay": 0,
+          "javascript_code": "// Convert active layer to Smart Object\nvar idnewPlacedLayer = stringIDToTypeID( \"newPlacedLayer\" );\nvar desc = new ActionDescriptor();\nexecuteAction( idnewPlacedLayer, desc, DialogModes.NO );\n\n\n// Select content of the active layer (load selection from transparency, like Ctrl+click)\nvar idsetd = charIDToTypeID( \"setd\" );\nvar desc2 = new ActionDescriptor();\nvar idnull = charIDToTypeID( \"null\" );\nvar ref = new ActionReference();\nvar idChnl = charIDToTypeID( \"Chnl\" );\nvar idfsel = charIDToTypeID( \"fsel\" );\nref.putProperty( idChnl, idfsel );\ndesc2.putReference( idnull, ref );\nvar idT = charIDToTypeID( \"T   \" );\nvar ref2 = new ActionReference();\nvar idChnl = charIDToTypeID( \"Chnl\" );\nvar idTrsp = charIDToTypeID( \"Trsp\" );\nref2.putEnumerated( idChnl, idChnl, idTrsp );\ndesc2.putReference( idT, ref2 );\nexecuteAction( idsetd, desc2, DialogModes.NO );\n\n\n// Crop to the selection\nvar idCrop = charIDToTypeID( \"Crop\" );\nvar desc3 = new ActionDescriptor();\nexecuteAction( idCrop, desc3, DialogModes.NO );\n\n\n// Deselect\napp.activeDocument.selection.deselect();",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 3
+        },
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "resizeTo4by3CanvasSize",
+          "type": "Script",
+          "icon": "code",
+          "color": "#ff3131",
+          "delay": 0,
+          "javascript_code": "// Set canvas size to 4000 x 3000 pixels, centered\nvar doc = app.activeDocument;\nvar newW = UnitValue(4000, \"px\");\nvar newH = UnitValue(3000, \"px\");\ndoc.resizeCanvas(newW, newH, AnchorPosition.MIDDLECENTER);",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 4
+        },
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "setResolutionTo300",
+          "type": "Script",
+          "icon": "code",
+          "color": "#ff3131",
+          "delay": 0,
+          "javascript_code": "// Set document resolution to 300 PPI without resampling\nvar doc = app.activeDocument;\ndoc.resizeImage(undefined, undefined, 300, ResampleMethod.NONE);",
+          "export_format": null,
+          "export_setting": 100,
+          "order_in_preset": 5
+        },
+        {
+          "action_set_name": "BATCH TOOLS",
+          "name": "EXPORT PNG",
+          "type": "Export",
+          "icon": "file-export",
+          "color": "#f44336",
+          "delay": 0,
+          "javascript_code": "",
+          "export_format": "PNG",
+          "export_setting": 100,
+          "order_in_preset": 6
+        }
+      ]
+    }
+  ]
+}
